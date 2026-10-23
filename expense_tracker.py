@@ -28,3 +28,23 @@ class ExpenseTracker:
             totals[e.category] = totals.get(e.category, 0) + e.amount
         return totals
 
+
+def main():
+    tracker = ExpenseTracker()
+    tracker.add_expense(Expense("2026-10-20", "Food", 150.0))
+    tracker.add_expense(Expense("2026-10-21", "Transport", 80.0))
+    tracker.add_expense(Expense("2026-10-22", "Food", 200.0))
+
+    print("=== ALL EXPENSES ===")
+    tracker.list_expenses()
+
+    print(f"\nTotal: Rs.{tracker.total():.2f}")
+
+    print("\n=== BY CATEGORY ===")
+    for cat, amt in tracker.total_by_category().items():
+        print(f"{cat:<12} Rs.{amt:.2f}")
+
+
+if __name__ == "__main__":
+    main()
+
