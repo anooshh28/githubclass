@@ -19,3 +19,6 @@ class ExpenseTracker:
         for e in self.expenses:
             e.display()
 
+    def total(self):
+        return sum(e.amount for e in self.expenses)
+
