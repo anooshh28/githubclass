@@ -27,30 +27,38 @@ class ExpenseTracker:
         for e in self.expenses:
             totals[e.category] = totals.get(e.category, 0) + e.amount
         return totals
-
-
 def main():
     tracker = ExpenseTracker()
-    tracker.add_expense(Expense("2026-10-20", "Food", 150.0))
-    tracker.add_expense(Expense("2026-10-21", "Transport", 80.0))
-    tracker.add_expense(Expense("2026-10-22", "Food", 200.0))
-    tracker.add_expense(Expense("2026-10-22", "Bills", 500.0))
-    tracker.add_expense(Expense("2026-10-23", "Shopping",2500.0))
-    tracker.add_expense(Expense("2026-10-24", "Medical", 200.0))
-    tracker.add_expense(Expense("2026-10-25", "Education", 1000.0))
-    tracker.add_expense(Expense("2026-10-26", "Other", 60.0))
 
+    print("=== EXPENSE TRACKER ===")
+    print("Categories:", ", ".join(ExpenseTracker.CATEGORIES))
 
-    print("=== ALL EXPENSES ===")
+    while True:
+        date = input("\nEnter date (YYYY-MM-DD): ")
+        category = input("Enter category: ")
+        amount = float(input("Enter amount: "))
+
+        tracker.add_expense(Expense(date, category, amount))
+
+        again = input("Add another expense? (y/n): ").lower()
+        if again != "y":
+            break
+
+    # --- all expenses ---
+    print("\n=== ALL EXPENSES ===")
     tracker.list_expenses()
 
+    # --- total ---
     print(f"\nTotal: Rs.{tracker.total():.2f}")
 
-    print("\n=== BY CATEGORY ===")
+    # --- category-wise totals ---
+    print("\n=== TOTAL BY CATEGORY ===")
     for cat, amt in tracker.total_by_category().items():
         print(f"{cat:<12} Rs.{amt:.2f}")
 
 
 if __name__ == "__main__":
     main()
+
+
 
