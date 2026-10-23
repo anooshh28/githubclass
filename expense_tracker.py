@@ -6,3 +6,16 @@ class Expense:
 
     def display(self):
         print(f"{self.date}  {self.category:<12} Rs.{self.amount:.2f}")
+
+
+class ExpenseTracker:
+    def __init__(self):
+        self.expenses = []
+
+    def add_expense(self, expense):
+        self.expenses.append(expense)
+
+    def list_expenses(self):
+        for e in self.expenses:
+            e.display()
+
