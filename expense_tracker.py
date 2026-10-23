@@ -22,3 +22,9 @@ class ExpenseTracker:
     def total(self):
         return sum(e.amount for e in self.expenses)
 
+    def total_by_category(self):
+        totals = {}
+        for e in self.expenses:
+            totals[e.category] = totals.get(e.category, 0) + e.amount
+        return totals
+
