@@ -34,6 +34,12 @@ def main():
     tracker.add_expense(Expense("2026-10-20", "Food", 150.0))
     tracker.add_expense(Expense("2026-10-21", "Transport", 80.0))
     tracker.add_expense(Expense("2026-10-22", "Food", 200.0))
+    tracker.add_expense(Expense("2026-10-22", "Bills", 500.0))
+    tracker.add_expense(Expense("2026-10-23", "Shopping",2500.0))
+    tracker.add_expense(Expense("2026-10-24", "Medical", 200.0))
+    tracker.add_expense(Expense("2026-10-25", "Education", 1000.0))
+    tracker.add_expense(Expense("2026-10-26", "Other", 60.0))
+
 
     print("=== ALL EXPENSES ===")
     tracker.list_expenses()
