@@ -28,23 +28,28 @@ class ExpenseTracker:
         for e in self.expenses:
             totals[e.category] = totals.get(e.category, 0) + e.amount
         return totals
-
-
 def main():
     tracker = ExpenseTracker()
 
     print("=== EXPENSE TRACKER ===")
-    print("Enter expenses one by one. Press n to stop.\n")
+    print("Enter a date, then add expenses for that day.\n")
 
     while True:
         date = input("Enter date (YYYY-MM-DD): ")
-        category = input("Enter category: ")
-        amount = float(input("Enter amount: "))
 
-        tracker.add_expense(Expense(date, category, amount))
+        # add expenses for this one day
+        while True:
+            category = input("  Enter category: ")
+            amount = float(input("  Enter amount: "))
 
-        again = input("Add another? (y/n): ").lower()
-        if again != "y":
+            tracker.add_expense(Expense(date, category, amount))
+
+            more = input("  Add another for this day? (y/n): ").lower()
+            if more != "y":
+                break
+
+        next_day = input("Move to next day? (y/n): ").lower()
+        if next_day != "y":
             break
 
     # --- per-day totals ---
@@ -63,4 +68,11 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+       
+   
+    
 
