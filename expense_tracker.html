@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f4f6f8;
+            color: #1f2937;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #374151;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+
+        .full { grid-column: 1 / -1; }
+
+        button {
+            grid-column: 1 / -1;
+            padding: 0.7rem;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover { background: #1d4ed8; }
+
+        h2 {
+            font-size: 1.1rem;
+            margin: 1.5rem 0 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 0.95rem;
+        }
+
+        .entry .date { color: #6b7280; font-size: 0.8rem; }
+        .entry .cat { background: #eef2ff; color: #4338ca; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.75rem; }
+        .entry .amount { font-weight: 600; }
+
+        .entry .delete {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0 0.25rem;
+        }
+
+        .entry .delete:hover { color: #b91c1c; }
+
+        .totals {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .total-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .total-card .cat { font-size: 0.8rem; color: #6b7280; }
+        .total-card .sum { font-size: 1.2rem; font-weight: 700; color: #111827; }
+
+        .empty {
+            color: #9ca3af;
+            text-align: center;
+            padding: 1.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .grand {
+            margin-top: 1rem;
+            text-align: right;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💸 Expense Tracker</h1>
+        <p class="subtitle">Add an expense for a day, then see totals by category.</p>
+
+        <form id="expense-form">
+            <div>
+                <label for="date">Date</label>
+                <input type="date" id="date" required>
+            </div>
+            <div>
+                <label for="category">Category</label>
+                <select id="category" required>
+                    <option value="">Select…</option>
+                    <option value="Food">Food</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Shopping">Shopping</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Bills">Bills</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="full">
+                <label for="amount">Amount (₹)</label>
+                <input type="number" id="amount" step="0.01" min="0" placeholder="0.00" required>
+            </div>
+            <button type="submit">Add Expense</button>
+        </form>
+
+        <h2>Entries</h2>
+        <div id="entries"></div>
+
+        <h2>Totals by Category</h2>
+        <div id="totals" class="totals"></div>
+        <div id="grand" class="grand"></div>
+    </div>
+
+    <script>
+        // Load saved expenses from localStorage, or start fresh
+        let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+
+        // ---- Render all entries ----
+        function renderEntries() {
+            const container = document.getElementById('entries');
+
+            if (expenses.length === 0) {
+                container.innerHTML = '<p class="empty">No expenses yet. Add your first one above!</p>';
+                return;
+            }
+
+            // Sort by date (newest first)
+            const sorted = [...expenses].sort((a, b) => b.date.localeCompare(a.date));
+
+            container.innerHTML = sorted.map((e, i) => `
+                <div class="entry">
+                    <span class="date">${e.date}</span>
+                    <span class="cat">${e.category}</span>
+                    <span class="amount">₹${Number(e.amount).toFixed(2)}</span>
+                    <button class="delete" data-id="${e.id}">✕</button>
+                </div>
+            `).join('');
+        }
+
+        // ---- Render totals by category (your total_by_category method!) ----
+        function renderTotals() {
+            const container = document.getElementById('totals');
+            const grandEl = document.getElementById('grand');
+
+            // Same logic as your Python: totals[cat] += amount
+            const totals = {};
+            let grandTotal = 0;
+
+            for (const e of expenses) {
+                totals[e.category] = (totals[e.category] || 0) + e.amount;
+                grandTotal += e.amount;
+            }
+
+            const cats = Object.keys(totals);
+            if (cats.length === 0) {
+                container.innerHTML = '<p class="empty">No totals yet.</p>';
+                grandEl.textContent = '';
+                return;
+            }
+
+            container.innerHTML = cats.map(cat => `
+                <div class="total-card">
+                    <div class="cat">${cat}</div>
+                    <div class="sum">₹${totals[cat].toFixed(2)}</div>
+                </div>
+            `).join('');
+
+            grandEl.textContent = `Grand Total: ₹${grandTotal.toFixed(2)}`;
+        }
+
+        // ---- Save to localStorage and refresh ----
+        function saveAndRender() {
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+            renderEntries();
+            renderTotals();
+        }
+
+        // ---- Handle form submit ----
+        document.getElementById('expense-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const date = document.getElementById('date').value;
+            const category = document.getElementById('category').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+
+            if (!date || !category || isNaN(amount) || amount < 0) return;
+
+            expenses.push({
+                id: Date.now(),           // unique id for each entry
+                date: date,
+                category: category,
+                amount: amount
+            });
+
+            saveAndRender();
+
+            // Reset amount field for quick entry
+            document.getElementById('amount').value = '';
+        });
+
+        // ---- Handle delete ----
+        document.getElementById('entries').addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete')) {
+                const id = Number(e.target.dataset.id);
+                expenses = expenses.filter(exp => exp.id !== id);
+                saveAndRender();
+            }
+        });
+
+        // ---- Initial render ----
+        renderEntries();
+        renderTotals();
+    </script>
+</body>
+</html>
